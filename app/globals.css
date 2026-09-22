@@ -2,6 +2,17 @@
 @import "tailwindcss";
 
 :root {
+  --bg-dark: 10 14 39;
+  --bg-darker: 5 8 20;
+  --bg-sidebar: 15 22 41;
+  --bg-input: 15 22 41;
+  --border-dim: 26 31 58;
+  --accent-green: 0 255 65;
+  --accent-cyan: 0 191 255;
+  --accent-error: 255 107 107;
+  --text-primary: 232 236 247;
+  --text-secondary: 143 153 181;
+  --text-success: 81 207 102;
   color-scheme: dark;
 }
 
@@ -19,19 +30,29 @@ body {
   background:
     radial-gradient(circle at 50% -20%, rgb(0 191 255 / 12%), transparent 34rem),
     #050814;
-  color: #e0e0e0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  color: rgb(var(--text-primary));
+  font-family: var(--font-inter), Inter, ui-sans-serif, sans-serif;
+  font-size: 14px;
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
 button,
-input {
+input,
+textarea {
   -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 ::selection {
@@ -52,4 +73,38 @@ input {
   border-radius: 999px;
   background: #1a1f3a;
   background-clip: padding-box;
+}
+
+.myfriend-shell[data-theme="light"] {
+  --bg-dark: 244 247 255;
+  --bg-darker: 231 236 247;
+  --bg-sidebar: 238 242 251;
+  --bg-input: 255 255 255;
+  --border-dim: 198 207 229;
+  --accent-green: 0 137 43;
+  --accent-cyan: 0 117 163;
+  --accent-error: 201 49 57;
+  --text-primary: 18 28 53;
+  --text-secondary: 82 96 127;
+  --text-success: 0 137 43;
+  color-scheme: light;
+}
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

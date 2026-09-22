@@ -14,3 +14,10 @@ export type ChatResponse = {
   response: string;
   provider: string;
 };
+
+export type ChatSession = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  updatedAt?: Date;
+};

@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, X } from "lucide-react";
 import { useEffect } from "react";
 
 type ErrorAlertProps = {
@@ -24,19 +25,20 @@ export default function ErrorAlert({ error, onClose }: ErrorAlertProps) {
   return (
     <div
       role="alert"
-      className="absolute inset-x-3 top-3 z-20 flex items-start justify-between gap-4 rounded-xl border border-text-error/35 bg-[#2a111b]/95 px-4 py-3 text-sm text-text-error shadow-2xl backdrop-blur-md sm:inset-x-auto sm:right-4 sm:max-w-md"
+      className="fixed bottom-5 left-4 right-4 z-[70] flex animate-toast-in items-start gap-3 rounded-xl border border-accent-error/35 bg-[#2a111b]/95 px-4 py-3 text-sm text-accent-error shadow-[0_18px_55px_rgba(0,0,0,0.4)] backdrop-blur-xl sm:left-auto sm:right-5 sm:max-w-md"
     >
-      <div>
+      <AlertTriangle size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
+      <div className="min-w-0 flex-1">
         <p className="font-semibold">Falha na solicitação</p>
         <p className="mt-1 leading-5 text-[#ffb3b3]">{error}</p>
       </div>
       <button
         type="button"
         onClick={onClose}
-        className="rounded-md px-2 py-1 text-xs font-semibold text-text-error transition hover:bg-text-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-error/60"
+        className="rounded-md p-1.5 text-accent-error transition hover:bg-accent-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-error/60"
         aria-label="Fechar alerta"
       >
-        Fechar
+        <X size={15} aria-hidden="true" />
       </button>
     </div>
   );

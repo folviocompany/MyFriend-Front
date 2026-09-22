@@ -1,3 +1,4 @@
+import { ArrowUp, Paperclip } from "lucide-react";
 import type { KeyboardEvent } from "react";
 
 type MessageInputProps = {
@@ -23,7 +24,7 @@ export default function MessageInput({
     await onSend(value.trim());
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>): void {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       event.currentTarget.form?.requestSubmit();
@@ -32,34 +33,49 @@ export default function MessageInput({
 
   return (
     <form
-      className="border-t border-border-dim bg-bg-darker/85 p-3 backdrop-blur-xl sm:p-4"
+      className="border-t border-border-dim bg-bg-darker/85 px-3 py-3 backdrop-blur-xl sm:px-6 sm:py-4"
       onSubmit={(event) => {
         event.preventDefault();
         void handleSubmit();
       }}
     >
-      <div className="flex items-center gap-2 rounded-2xl border border-border-dim bg-bg-input p-2 shadow-inner transition focus-within:border-text-info/50 focus-within:shadow-[0_0_0_3px_rgba(0,191,255,0.08)] sm:gap-3">
+      <div className="mx-auto max-w-4xl">
+        <div className="flex items-end gap-2 rounded-2xl border border-border-dim bg-bg-input p-2 shadow-[0_14px_40px_rgba(0,0,0,0.16)] transition focus-within:border-accent-cyan/50 focus-within:shadow-[0_0_0_3px_rgba(0,191,255,0.08)] sm:gap-3">
+          <button
+            type="button"
+            disabled
+            className="mb-0.5 hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl text-text-secondary/45 sm:flex"
+            aria-label="Anexos indisponíveis nesta versão"
+            title="Anexos em breve"
+          >
+            <Paperclip size={18} aria-hidden="true" />
+          </button>
         <label className="sr-only" htmlFor="support-message">
           Pergunta técnica
         </label>
-        <input
+        <textarea
           id="support-message"
-          type="text"
           autoComplete="off"
+          rows={1}
           value={value}
           disabled={loading}
           onChange={(event) => onValueChange(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Digite sua pergunta técnica..."
-          className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-base text-text-primary outline-none placeholder:text-text-secondary/65 disabled:cursor-not-allowed disabled:opacity-60"
+          placeholder="Descreva o problema técnico..."
+          className="max-h-32 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2.5 text-base leading-6 text-text-primary outline-none placeholder:text-text-secondary/65 disabled:cursor-not-allowed disabled:opacity-60"
         />
         <button
           type="submit"
           disabled={!canSend}
-          className="shrink-0 rounded-xl border border-text-accent/35 bg-text-accent/10 px-4 py-2.5 text-sm font-semibold text-text-accent transition hover:border-text-accent/70 hover:bg-text-accent/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-accent/60 disabled:cursor-not-allowed disabled:border-border-dim disabled:bg-transparent disabled:text-text-secondary/45 sm:px-5"
+          className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-accent-green/35 bg-accent-green text-bg-darker shadow-[0_0_20px_rgba(0,255,65,0.12)] transition hover:-translate-y-0.5 hover:bg-accent-green/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-green/60 disabled:translate-y-0 disabled:border-border-dim disabled:bg-bg-dark disabled:text-text-secondary/40 disabled:shadow-none"
+          aria-label="Enviar mensagem"
         >
-          Enviar
+          <ArrowUp size={19} strokeWidth={2.5} aria-hidden="true" />
         </button>
+        </div>
+        <p className="mt-2 hidden text-center font-mono text-[0.6875rem] text-text-secondary/70 sm:block">
+          Enter envia · Shift + Enter cria uma nova linha
+        </p>
       </div>
     </form>
   );

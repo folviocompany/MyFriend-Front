@@ -6,7 +6,7 @@ type ResponseDisplayProps = {
 
 export default function ResponseDisplay({ content }: ResponseDisplayProps) {
   return (
-    <div className="whitespace-pre-wrap break-words text-[0.9375rem] leading-7">
+    <div className="break-words text-[0.9375rem] leading-7 sm:text-base">
       {simpleMarkdownToJsx(content)}
     </div>
   );
