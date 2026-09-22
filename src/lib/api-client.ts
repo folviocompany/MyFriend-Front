@@ -32,29 +32,22 @@ async function readProblemDetail(response: Response): Promise<ProblemDetail> {
     : {};
 }
 
-export async function askAssistant(
-  message: string,
-  apiKey?: string,
-): Promise<ChatResponse> {
+export async function askAssistant(message: string): Promise<ChatResponse> {
   const normalizedMessage = message.trim();
 
   if (!normalizedMessage) {
     throw new ApiError(400, "Mensagem não pode ser vazia");
   }
 
-  const apiUrl = (
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
-  ).replace(/\/$/, "");
   const body: ChatRequest = { message: normalizedMessage };
 
   let response: Response;
 
   try {
-    response = await fetch(`${apiUrl}/api/v1/chat`, {
+    response = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(apiKey ? { "X-API-Key": apiKey } : {}),
       },
       body: JSON.stringify(body),
     });
