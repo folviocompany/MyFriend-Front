@@ -16,7 +16,9 @@ body {
 
 body {
   margin: 0;
-  background: #050814;
+  background:
+    radial-gradient(circle at 50% -20%, rgb(0 191 255 / 12%), transparent 34rem),
+    #050814;
   color: #e0e0e0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
@@ -25,4 +27,29 @@ body {
 button,
 input {
   font: inherit;
+}
+
+button,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgb(0 255 65 / 24%);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #1a1f3a;
+  background-clip: padding-box;
 }
