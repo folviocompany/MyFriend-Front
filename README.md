@@ -61,7 +61,7 @@ Crie um arquivo `.env.local` apenas para desenvolvimento:
 
 ```env
 BACKEND_API_URL=http://localhost:8080
-BACKEND_API_KEY=sua-chave-local
+BACKEND_API_KEY=<defina-uma-chave-local>
 ```
 
 Inicie o projeto:
@@ -151,7 +151,15 @@ src/
 ## Segurança
 
 - A chave do backend existe somente no ambiente do servidor.
+- Arquivos `.env*` são ignorados pelo Git, com exceção do modelo sem segredos `.env.example`.
 - O proxy não repassa cabeçalhos enviados pelo navegador.
-- As mensagens são validadas antes da chamada ao Railway.
+- O proxy aceita somente JSON da mesma origem, limita o tamanho das requisições e valida as mensagens.
+- A resposta do backend é filtrada para expor somente `response` e `provider`.
+- Erros internos do backend não são repassados ao navegador.
 - Respostas do backend não são armazenadas em cache.
+- Cabeçalhos defensivos exigem HTTPS e bloqueiam framing, MIME sniffing, recursos cross-origin e permissões de navegador desnecessárias.
 - O projeto não possui autenticação do cliente nem histórico persistente nesta etapa.
+
+O endpoint `/api/chat` é público. Para um ambiente com tráfego aberto, recomenda-se adicionar rate limiting no backend ou na borda da Vercel antes de divulgar amplamente a aplicação.
+
+Se uma chave for exposta acidentalmente, remova-a do ambiente comprometido, gere uma nova chave e atualize o Secret na Vercel. Apenas apagar o valor do commit atual não o remove do histórico Git.

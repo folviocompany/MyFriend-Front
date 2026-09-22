@@ -4,24 +4,68 @@ type ChatRequestBody = {
   message?: unknown;
 };
 
-function getErrorDetail(payload: unknown): string | undefined {
+type ChatResponseBody = {
+  response: string;
+  provider: string;
+};
+
+const MAX_REQUEST_BYTES = 16_384;
+const MAX_MESSAGE_LENGTH = 4_000;
+
+function hasStringProperty(
+  payload: unknown,
+  property: string,
+): payload is Record<string, string> {
   if (
     typeof payload === "object" &&
     payload !== null &&
-    "detail" in payload &&
-    typeof payload.detail === "string"
+    property in payload &&
+    typeof (payload as Record<string, unknown>)[property] === "string"
   ) {
-    return payload.detail;
+    return true;
   }
 
-  return undefined;
+  return false;
+}
+
+function isChatResponse(payload: unknown): payload is ChatResponseBody {
+  return (
+    hasStringProperty(payload, "response") &&
+    hasStringProperty(payload, "provider")
+  );
+}
+
+function getSafeUpstreamError(status: number): string {
+  switch (status) {
+    case 400:
+      return "Requisição inválida";
+    case 401:
+    case 403:
+      return "Falha de autenticação com o serviço";
+    case 429:
+      return "Limite de requisições excedido";
+    case 504:
+      return "Timeout na resposta do servidor";
+    default:
+      return status >= 500
+        ? "Serviço indisponível"
+        : "Não foi possível processar a solicitação";
+  }
 }
 
 function getBackendUrl(value: string): string | null {
   try {
     const url = new URL(value);
+    const isLoopback =
+      url.hostname === "localhost" ||
+      url.hostname === "127.0.0.1" ||
+      url.hostname === "[::1]";
 
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
+    if (
+      (url.protocol !== "https:" && !(url.protocol === "http:" && isLoopback)) ||
+      url.username ||
+      url.password
+    ) {
       return null;
     }
 
@@ -34,8 +78,41 @@ function getBackendUrl(value: string): string | null {
 export async function POST(request: NextRequest) {
   let body: ChatRequestBody;
 
+  const origin = request.headers.get("origin");
+  if (origin && origin !== request.nextUrl.origin) {
+    return NextResponse.json(
+      { detail: "Origem não permitida" },
+      { status: 403 },
+    );
+  }
+
+  const contentType = request.headers.get("content-type");
+  if (!contentType?.toLowerCase().startsWith("application/json")) {
+    return NextResponse.json(
+      { detail: "Content-Type deve ser application/json" },
+      { status: 415 },
+    );
+  }
+
+  const contentLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES) {
+    return NextResponse.json(
+      { detail: "Requisição muito grande" },
+      { status: 413 },
+    );
+  }
+
   try {
-    body = (await request.json()) as ChatRequestBody;
+    const rawBody = await request.text();
+
+    if (new TextEncoder().encode(rawBody).byteLength > MAX_REQUEST_BYTES) {
+      return NextResponse.json(
+        { detail: "Requisição muito grande" },
+        { status: 413 },
+      );
+    }
+
+    body = JSON.parse(rawBody) as ChatRequestBody;
   } catch {
     return NextResponse.json(
       { detail: "Corpo da requisição inválido" },
@@ -46,6 +123,13 @@ export async function POST(request: NextRequest) {
   if (typeof body.message !== "string" || !body.message.trim()) {
     return NextResponse.json(
       { detail: 'Campo "message" é obrigatório' },
+      { status: 400 },
+    );
+  }
+
+  if (body.message.trim().length > MAX_MESSAGE_LENGTH) {
+    return NextResponse.json(
+      { detail: `A mensagem deve ter no máximo ${MAX_MESSAGE_LENGTH} caracteres` },
       { status: 400 },
     );
   }
@@ -96,15 +180,26 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(
-        { detail: getErrorDetail(data) || `Erro ${response.status}` },
+        { detail: getSafeUpstreamError(response.status) },
         { status: response.status, headers },
       );
     }
 
-    return NextResponse.json(data, {
-      status: 200,
-      headers: { "Cache-Control": "no-store" },
-    });
+    if (!isChatResponse(data)) {
+      console.error("Backend retornou um formato de resposta inválido");
+      return NextResponse.json(
+        { detail: "Resposta inválida do serviço" },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json(
+      { response: data.response, provider: data.provider },
+      {
+        status: 200,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
   } catch (error) {
     const isTimeout =
       error instanceof Error &&
